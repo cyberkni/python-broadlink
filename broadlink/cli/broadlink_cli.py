@@ -18,8 +18,7 @@ def auto_int(x):
 def format_pulses(pulses: List[int]) -> str:
     """Format pulses."""
     return " ".join(
-        f"+{pulse}" if i % 2 == 0 else f"-{pulse}"
-        for i, pulse in enumerate(pulses)
+        f"+{pulse}" if i % 2 == 0 else f"-{pulse}" for i, pulse in enumerate(pulses)
     )
 
 
@@ -29,32 +28,63 @@ def parse_pulses(data: List[str]) -> List[int]:
 
 
 def main():
-    parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+    parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
     parser.add_argument("--device", help="device definition as 'type host mac'")
     parser.add_argument("--type", type=auto_int, default=0x2712, help="type of device")
     parser.add_argument("--host", help="host address")
-    parser.add_argument("--mac", help="mac address (hex reverse), as used by python-broadlink library")
-    parser.add_argument("--temperature", action="store_true", help="request temperature from device")
-    parser.add_argument("--humidity", action="store_true", help="request humidity from device")
-    parser.add_argument("--energy", action="store_true", help="request energy consumption from device")
-    parser.add_argument("--check", action="store_true", help="check current power state")
-    parser.add_argument("--checknl", action="store_true", help="check current nightlight state")
+    parser.add_argument(
+        "--mac", help="mac address (hex reverse), as used by python-broadlink library"
+    )
+    parser.add_argument(
+        "--temperature", action="store_true", help="request temperature from device"
+    )
+    parser.add_argument(
+        "--humidity", action="store_true", help="request humidity from device"
+    )
+    parser.add_argument(
+        "--energy", action="store_true", help="request energy consumption from device"
+    )
+    parser.add_argument(
+        "--check", action="store_true", help="check current power state"
+    )
+    parser.add_argument(
+        "--checknl", action="store_true", help="check current nightlight state"
+    )
     parser.add_argument("--turnon", action="store_true", help="turn on device")
     parser.add_argument("--turnoff", action="store_true", help="turn off device")
-    parser.add_argument("--turnnlon", action="store_true", help="turn on nightlight on the device")
-    parser.add_argument("--turnnloff", action="store_true", help="turn off nightlight on the device")
-    parser.add_argument("--switch", action="store_true", help="switch state from on to off and off to on")
+    parser.add_argument(
+        "--turnnlon", action="store_true", help="turn on nightlight on the device"
+    )
+    parser.add_argument(
+        "--turnnloff", action="store_true", help="turn off nightlight on the device"
+    )
+    parser.add_argument(
+        "--switch",
+        action="store_true",
+        help="switch state from on to off and off to on",
+    )
     parser.add_argument("--send", action="store_true", help="send command")
     parser.add_argument("--sensors", action="store_true", help="check all sensors")
     parser.add_argument("--learn", action="store_true", help="learn command")
     parser.add_argument("--rflearn", action="store_true", help="rf scan learning")
-    parser.add_argument("--frequency", type=float, help="specify radiofrequency for learning")
+    parser.add_argument(
+        "--frequency", type=float, help="specify radiofrequency for learning"
+    )
     parser.add_argument("--learnfile", help="save learned command to a specified file")
-    parser.add_argument("--durations", action="store_true",
-                        help="use durations in micro seconds instead of the Broadlink format")
-    parser.add_argument("--convert", action="store_true", help="convert input data to durations")
-    parser.add_argument("--joinwifi", nargs=2, help="Args are SSID PASSPHRASE to configure Broadlink device with")
-    parser.add_argument("data", nargs='*', help="Data to send or convert")
+    parser.add_argument(
+        "--durations",
+        action="store_true",
+        help="use durations in micro seconds instead of the Broadlink format",
+    )
+    parser.add_argument(
+        "--convert", action="store_true", help="convert input data to durations"
+    )
+    parser.add_argument(
+        "--joinwifi",
+        nargs=2,
+        help="Args are SSID PASSPHRASE to configure Broadlink device with",
+    )
+    parser.add_argument("data", nargs="*", help="Data to send or convert")
     args = parser.parse_args()
 
     if args.device:
@@ -75,7 +105,7 @@ def main():
         broadlink.setup(args.joinwifi[0], args.joinwifi[1], 4)
 
     if args.convert:
-        data = bytearray.fromhex(''.join(args.data))
+        data = bytearray.fromhex("".join(args.data))
         pulses = data_to_pulses(data)
         print(format_pulses(pulses))
     if args.temperature:
@@ -92,7 +122,7 @@ def main():
         data = (
             pulses_to_data(parse_pulses(args.data))
             if args.durations
-            else bytes.fromhex(''.join(args.data))
+            else bytes.fromhex("".join(args.data))
         )
         dev.send_data(data)
     if args.learn or (args.learnfile and not args.rflearn):
@@ -113,7 +143,7 @@ def main():
 
         print("Packet found!")
         raw_fmt = data.hex()
-        base64_fmt = base64.b64encode(data).decode('ascii')
+        base64_fmt = base64.b64encode(data).decode("ascii")
         pulse_fmt = format_pulses(data_to_pulses(data))
 
         print("Raw:", raw_fmt)
@@ -126,45 +156,45 @@ def main():
                 text_file.write(pulse_fmt if args.durations else raw_fmt)
     if args.check:
         if dev.check_power():
-            print('* ON *')
+            print("* ON *")
         else:
-            print('* OFF *')
+            print("* OFF *")
     if args.checknl:
         if dev.check_nightlight():
-            print('* ON *')
+            print("* ON *")
         else:
-            print('* OFF *')
+            print("* OFF *")
     if args.turnon:
         dev.set_power(True)
         if dev.check_power():
-            print('== Turned * ON * ==')
+            print("== Turned * ON * ==")
         else:
-            print('!! Still OFF !!')
+            print("!! Still OFF !!")
     if args.turnoff:
         dev.set_power(False)
         if dev.check_power():
-            print('!! Still ON !!')
+            print("!! Still ON !!")
         else:
-            print('== Turned * OFF * ==')
+            print("== Turned * OFF * ==")
     if args.turnnlon:
         dev.set_nightlight(True)
         if dev.check_nightlight():
-            print('== Turned * ON * ==')
+            print("== Turned * ON * ==")
         else:
-            print('!! Still OFF !!')
+            print("!! Still OFF !!")
     if args.turnnloff:
         dev.set_nightlight(False)
         if dev.check_nightlight():
-            print('!! Still ON !!')
+            print("!! Still ON !!")
         else:
-            print('== Turned * OFF * ==')
+            print("== Turned * OFF * ==")
     if args.switch:
         if dev.check_power():
             dev.set_power(False)
-            print('* Switch to OFF *')
+            print("* Switch to OFF *")
         else:
             dev.set_power(True)
-            print('* Switch to ON *')
+            print("* Switch to ON *")
     if args.rflearn:
         if args.frequency:
             frequency = args.frequency
@@ -208,7 +238,7 @@ def main():
 
         print("Packet found!")
         raw_fmt = data.hex()
-        base64_fmt = base64.b64encode(data).decode('ascii')
+        base64_fmt = base64.b64encode(data).decode("ascii")
         pulse_fmt = format_pulses(data_to_pulses(data))
 
         print("Raw:", raw_fmt)
